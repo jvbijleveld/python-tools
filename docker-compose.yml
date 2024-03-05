@@ -1,0 +1,8 @@
+---
+version: '2.1'
+services:
+  python-tools:
+    image: jvbijleveld/python-tools:arm
+    container_name: python-tools
+    network_mode: host
+    restart: unless-stopped
