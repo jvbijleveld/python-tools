@@ -1,5 +1,5 @@
-from datetime import timedelta, date
-
+from datetime import timedelta, date, datetime
+import locale
 import requests
 from fastapi import APIRouter, status
 from starlette.responses import Response
@@ -17,21 +17,22 @@ router = APIRouter(
 async def get_nextday_container(response: Response):
     resp = await get_next_pickup()
     data = resp.json()
+    locale.setlocale(locale.LC_TIME, "nl_NL.UTF-8")
     if (len(data['dataList']) > 0):
         container = get_container_name(data['dataList'][0]['_pickupTypeText'])
-        date = data['dataList'][0]['pickupDates'][0]
+        date = datetime.strptime(data['dataList'][0]['pickupDates'][0], '%Y-%m-%dT%H:%M:%S')
     else:
         container = 'geen'
         date = ''
 
     response.status_code = status.HTTP_200_OK
-    return {"nextContainer": container, "datum": date}
+    return {"nextContainer": container, "datum": date.strftime('%A %d %B')}
 
 
 async def get_next_pickup():
     url = 'https://wasteapi.ximmio.com/api/GetCalendar'
     startDate = date.today().strftime("%Y-%m-%d")
-    endDate = (date.today() + timedelta(days=1)).strftime("%Y-%m-%d")
+    endDate = (date.today() + timedelta(days=14)).strftime("%Y-%m-%d")
     payload = {"companyCode": companyCode, "uniqueAddressID": locationId, "startDate": startDate, "endDate": endDate}
     header = {"Content-type": "application/json",
               "Accept": "*/*"}
