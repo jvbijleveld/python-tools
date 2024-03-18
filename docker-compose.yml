@@ -6,3 +6,5 @@ services:
     container_name: python-tools
     network_mode: host
     restart: unless-stopped
+    expose:
+      - 80

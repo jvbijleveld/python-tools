@@ -25,4 +25,4 @@ RUN chmod 755 -R /app/app
 
 WORKDIR /app
 
-CMD ["uvicorn", "app.main:app", "--port", "80"]
+CMD ["uvicorn", "app.main:app", "--port", "80", "--host", "0.0.0.0"]
