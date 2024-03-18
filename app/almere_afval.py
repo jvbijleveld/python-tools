@@ -4,6 +4,8 @@ import requests
 from fastapi import APIRouter, status
 from starlette.responses import Response
 
+from operator import itemgetter
+
 companyCode = "53d8db94-7945-42fd-9742-9bbc71dbe4c1"
 locationId = "325957"
 
@@ -19,8 +21,12 @@ async def get_nextday_container(response: Response):
     data = resp.json()
     locale.setlocale(locale.LC_TIME, "nl_NL.UTF-8")
     if (len(data['dataList']) > 0):
-        container = get_container_name(data['dataList'][0]['_pickupTypeText'])
-        date = datetime.strptime(data['dataList'][0]['pickupDates'][0], '%Y-%m-%dT%H:%M:%S')
+        dataList = sorted(data['dataList'], key=itemgetter('pickupDates'))
+
+        # print(dataList)
+
+        container = get_container_name(dataList[0]['_pickupTypeText'])
+        date = datetime.strptime(dataList[0]['pickupDates'][0], '%Y-%m-%dT%H:%M:%S')
     else:
         container = 'geen'
         date = ''
@@ -31,7 +37,7 @@ async def get_nextday_container(response: Response):
 
 async def get_next_pickup():
     url = 'https://wasteapi.ximmio.com/api/GetCalendar'
-    startDate = date.today().strftime("%Y-%m-%d")
+    startDate = (date.today() + timedelta(days=1)).strftime("%Y-%m-%d")
     endDate = (date.today() + timedelta(days=14)).strftime("%Y-%m-%d")
     payload = {"companyCode": companyCode, "uniqueAddressID": locationId, "startDate": startDate, "endDate": endDate}
     header = {"Content-type": "application/json",
@@ -45,4 +51,4 @@ def get_container_name(container_type):
         case 'GREEN': return "GFT"
         case 'PACKAGES': return "PMD"
         case 'PAPER': return "Papier"
-        case 'Grey': return "Restafval"
+        case 'GREY': return "Restafval"
