@@ -53,3 +53,5 @@ def get_container_name(container_type):
         case 'PAPER': return "Papier"
         case 'GREY': return "Restafval"
         case 'BULKYRESTWASTE': return "Restafval"
+        case _: return container_type
+
